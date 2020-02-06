@@ -27,6 +27,8 @@ RUN \
   ln -s /usr/bin/ninja-build /usr/bin/ninja && \
   pip3 install meson==0.52.1
 
+RUN yum install -y openjpeg2-devel
+
 # Compiler settings
 ENV \
   CC="/opt/rh/devtoolset-8/root/usr/bin/gcc" \

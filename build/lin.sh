@@ -17,6 +17,7 @@ export CFLAGS="${FLAGS}"
 export CXXFLAGS="${FLAGS}"
 
 # Dependency version numbers
+VERSION_POPPLER=0.85.0
 VERSION_ZLIB=1.2.11
 VERSION_FFI=3.3
 VERSION_GLIB=2.63.3
@@ -56,6 +57,7 @@ version_latest() {
     echo "$1 version $2 has been superseded by $VERSION_LATEST"
   fi
 }
+version_latest "poppler" "$VERSION_POPPLER" "3686"
 version_latest "zlib" "$VERSION_ZLIB" "5303"
 version_latest "ffi" "$VERSION_FFI" "1611"
 version_latest "glib" "$VERSION_GLIB" "10024"
@@ -80,7 +82,7 @@ version_latest "fribidi" "$VERSION_FRIBIDI" "857"
 version_latest "pango" "$VERSION_PANGO" "11783"
 version_latest "svg" "$VERSION_SVG" "5420"
 #version_latest "gif" "$VERSION_GIF" "1158" # v5.1.5+ provides a Makefile only so will require custom cross-compilation setup
-if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
+#if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
 
@@ -267,6 +269,16 @@ curl -Ls https://sourceforge.mirrorservice.org/g/gi/giflib/giflib-${VERSION_GIF}
 cd ${DEPS}/gif
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
+
+mkdir ${DEPS}/poppler
+curl -Ls https://poppler.freedesktop.org/poppler-0.85.0.tar.xz | tar xJC ${DEPS}/poppler --strip-components=1
+cd ${DEPS}/poppler
+mkdir build
+cd build
+cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=release -DCMAKE_TOOLCHAIN_FILE=/root/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
+  -DENABLE_SHARED=TRUE -DENABLE_STATIC=FALSE
+make
+make install
 
 mkdir ${DEPS}/vips
 curl -Ls https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
